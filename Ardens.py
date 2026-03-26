@@ -1,16 +1,19 @@
-# SI 201 HW4 (Library Checkout System)
-# Your name:
-# Your student id:
-# Your email:
-# Who or what you worked with on this homework (including generative AI like ChatGPT):
+
+# Your name: Arden Stirling
+# Your student id: 8531 6564
+# Your email: starden@umich.edu
+# Who or what you worked with on this homework (including generative AI like ChatGPT): Adila
 # If you worked with generative AI also add a statement for how you used it.
-# e.g.:
+# e.g.: Google Gemini, Chat GPT
 # Asked ChatGPT for hints on debugging and for suggestions on overall code structure
 #
 # Did your use of GenAI on this assignment align with your goals and guidelines in your Gen AI contract? If not, why?
 #
 # --- ARGUMENTS & EXPECTED RETURN VALUES PROVIDED --- #
 # --- SEE INSTRUCTIONS FOR FULL DETAILS ON METHOD IMPLEMENTATION --- #
+
+# The html file I'd like to use: listing_6107359.html
+# File path: /Users/ardenstirling/Desktop/Data Prog/project2-w26-got_it_2/html_files/listing_6107359.html
 
 from bs4 import BeautifulSoup
 import re
