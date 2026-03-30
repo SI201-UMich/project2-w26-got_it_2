@@ -47,15 +47,26 @@ def load_listing_results(html_path) -> list[tuple]:
     # ==============================
 
     l_results = []
-    with open(html_path, "r", encoding="utf-8-sig") as file:
-        html_content = file.read()
-        soup = BeautifulSoup(html_content, 'html.parser')
-        h1 = soup.find_all('h1')
+    try:
+        with open(html_path, "r", encoding="utf-8-sig") as file:
+            html_content = file.read()
+            soup = BeautifulSoup(html_content, 'html.parser')
 
-        for item in h1:
-            l_title = item.find('class').text
-            l_id = item.get('href')
+            title = soup.find('title')
+            if title:
+                l_title = title.get_text(strip=True)
+            else:
+                l_title = "No Title Found"
+
+            id = soup.find('link', rel='canonical').get('href')
+            if id:
+                l_id = id.split('/')[-1]
+            else:
+                l_id = "No Id Found"
             l_results.append((l_title, l_id))
+
+    except FileNotFoundError:
+        print(f"File {html_path} was not found")
     return l_results
 
     # ==============================
