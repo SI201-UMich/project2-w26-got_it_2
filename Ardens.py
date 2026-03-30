@@ -25,7 +25,8 @@ import requests  # kept for extra credit parity
 
 # IMPORTANT NOTE:
 """
-If you are getting "encoding errors" while trying to open, read, or write from a file, add the following argument to any of your open() functions:
+If you are getting "encoding errors" while trying to open, read, or write from a file, 
+add the following argument to any of your open() functions:
     encoding="utf-8-sig"
 """
 
@@ -44,7 +45,19 @@ def load_listing_results(html_path) -> list[tuple]:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+
+    l_results = []
+    with open(html_path, "r", encoding="utf-8-sig") as file:
+        html_content = file.read()
+        soup = BeautifulSoup(html_content, 'html.parser')
+        h1 = soup.find_all('h1')
+
+        for item in h1:
+            l_title = item.find('class').text
+            l_id = item.get('href')
+            l_results.append((l_title, l_id))
+    return l_results
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
