@@ -67,6 +67,7 @@ def load_listing_results(html_path) -> list[tuple]:
 
     except FileNotFoundError:
         print(f"File {html_path} was not found")
+
     return l_results
 
     # ==============================
@@ -97,7 +98,18 @@ def get_listing_details(listing_id) -> dict:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    file_name = f"listing_{listing_id}.html"
+    l_dict = {}
+
+    try:
+        with open(file_name, "r", encoding="utf-8-sig") as file:
+            html_content = file.read()
+            soup = BeautifulSoup(html_content, 'html.parser')
+            soup.find()
+
+    except:
+
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
