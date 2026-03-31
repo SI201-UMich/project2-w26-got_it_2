@@ -98,16 +98,35 @@ def get_listing_details(listing_id) -> dict:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    file_name = f"listing_{listing_id}.html"
+
     l_dict = {}
+    with open(listing_id.html, "r", encoding="utf-8-sig") as file:
+        html_content = file.read()
+        soup = BeautifulSoup(html_content, 'html.parser')
 
-    try:
-        with open(file_name, "r", encoding="utf-8-sig") as file:
-            html_content = file.read()
-            soup = BeautifulSoup(html_content, 'html.parser')
-            soup.find()
+        # example html line:
+        # "Policy number: " "== $0 <span class="ll4r2nl dir dir-ltr">STR-0001085</span>
+        policy_number = soup.find('span', class_='ll4r2nl').get_text()
+        
 
-    except:
+        # example html line:
+        # <span aria-hidden="false" class"_1mhorg9">Superhost</span> == $0
+        host_type = soup.find('span', class_='_1mhorg9').get_text()
+        
+        # example html line:
+        # <h2 tabindex="-1" class="hnwb2pd dir dir-ltr" elementtiming="LCP-target">Hosted by Michelle</h2> == $0
+        host_name = soup.find('h2', class_='hnwb2pb').get_text()
+
+        # example html line:
+        # <div class="_kh3xmo">Private room in home</div> == $0
+        room_type = soup.find('span', class_='_kh3xmo').get_text()
+
+        #example html line:
+        #
+        button = soup.find('button', attrs={'aria-label': re.compile(r'Rated')})
+        if button:
+            full_label = button['aria-label']
+            location_rating = re.search(r'(\d+\d+)', full_label).group(1)
 
 
     # ==============================
