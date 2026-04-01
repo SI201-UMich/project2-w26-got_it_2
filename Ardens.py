@@ -50,20 +50,21 @@ def load_listing_results(html_path) -> list[tuple]:
     try:
         with open(html_path, "r", encoding="utf-8-sig") as file:
             html_content = file.read()
-            soup = BeautifulSoup(html_content, 'html.parser')
+        
+        soup = BeautifulSoup(html_content, 'html.parser')
 
-            title = soup.find('title')
-            if title:
-                l_title = title.get_text(strip=True)
-            else:
-                l_title = "No Title Found"
+        # This looks good - might need another loop
+        title = soup.find('title')
+        if title:
+            l_title = title.get_text(strip=True)
+        else:
+            l_title = "No Title Found"
 
-            id = soup.find('link', rel='canonical').get('href')
-            if id:
-                l_id = id.split('/')[-1]
-            else:
-                l_id = "No Id Found"
-            l_results.append((l_title, l_id))
+        # This is not how you access the right listing id, look at the search results html
+        id = soup.find('link', rel='canonical').get('href')
+        
+        
+        l_results.append((l_title, l_id))
 
     except FileNotFoundError:
         print(f"File {html_path} was not found")
