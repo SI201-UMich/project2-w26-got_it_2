@@ -104,34 +104,64 @@ def get_listing_details(listing_id) -> dict:
     # ==============================
 
     l_dict = {}
-    with open(listing_id.html, "r", encoding="utf-8-sig") as file:
-        html_content = file.read()
+    file_path = f"listing_{listing_id}.html"
+
+    try:
+        with open(file_path, "r", encoding="utf-8-sig") as file:
+            html_content = file.read()
+        
         soup = BeautifulSoup(html_content, 'html.parser')
 
         # example html line:
         # "Policy number: " "== $0 <span class="ll4r2nl dir dir-ltr">STR-0001085</span>
-        policy_number = soup.find('span', class_='ll4r2nl').get_text()
-        
+        policy_num = soup.find('span', class_='ll4r2nl').get_text()
+        policy_number = ""
+        if "pending" in policy_num:
+            policy_number = "Pending"
+        elif "exempt" in policy_num:
+            policy_number = "Exempt"
+        else:
+            policy_number = policy_num
 
         # example html line:
         # <span aria-hidden="false" class"_1mhorg9">Superhost</span> == $0
-        host_type = soup.find('span', class_='_1mhorg9').get_text()
-        
+        host_check = soup.find('span', class_='_1mhorg9').get_text()
+        host_type = ""
+
+        if host_check:
+            host_check.strip()
+            if host_check == "Superhost":
+                host_type = "Superhost"
+            else:
+                host_type = "Regular"
+                
         # example html line:
         # <h2 tabindex="-1" class="hnwb2pd dir dir-ltr" elementtiming="LCP-target">Hosted by Michelle</h2> == $0
         host_name = soup.find('h2', class_='hnwb2pb').get_text()
 
         # example html line:
         # <div class="_kh3xmo">Private room in home</div> == $0
-        room_type = soup.find('span', class_='_kh3xmo').get_text()
+        room_check = soup.find('span', class_='_kh3xmo').get_text()
+        room_type = ""
 
-        #example html line:
-        #
+        if room_check:
+            room_check.strip()
+            if "Private" in room_check:
+                room_type = "Private Room"
+            elif "Shared" in room_check:
+                room_type = "Shared Room"
+            else:
+                room_type = "Entire Room"
+
         button = soup.find('button', attrs={'aria-label': re.compile(r'Rated')})
         if button:
             full_label = button['aria-label']
             location_rating = re.search(r'(\d+\d+)', full_label).group(1)
 
+    except FileNotFoundError:
+        print(f"Error: The file {file_path} was not found.")
+
+    return l_dict
 
     # ==============================
     # YOUR CODE ENDS HERE
