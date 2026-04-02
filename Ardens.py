@@ -294,7 +294,29 @@ def avg_location_rating_by_room_type(data) -> dict:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    
+    avg_rating = {}
+    final_averages = {}
+
+    for d_tuple in data:
+        listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating = d_tuple
+        
+        if location_rating == 0.0:
+            continue
+        
+        if room_type not in avg_rating:
+            avg_rating[room_type] = {'total_score': location_rating, 'count': 1}
+        else:
+            avg_rating[room_type]['total_score'] += location_rating
+            avg_rating[room_type]['count'] += 1
+
+    for room, stats in avg_rating.items():
+        average = stats['total_score'] / stats['count']
+        final_averages[room] = round(average, 1)
+
+    return final_averages
+
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
