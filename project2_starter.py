@@ -70,63 +70,99 @@ def load_listing_results(html_path) -> list[tuple]:
 
     return l_results
 
-
 def get_listing_details(listing_id) -> dict:
     """
     Parse through listing_<id>.html to extract listing details.
+
+    Args:
+        listing_id (str): The listing id of the Airbnb listing
+
+    Returns:
+        dict: Nested dictionary in the format:
+        {
+            "<listing_id>": {
+                "policy_number": str,
+                "host_type": str,
+                "host_name": str,
+                "room_type": str,
+                "location_rating": float
+            }
+        }
     """
+    # TODO: Implement checkout logic following the instructions
+    # ==============================
+    # YOUR CODE STARTS HERE
+    # ==============================
 
     l_dict = {}
 
-    html_file = f"html_files/listing_{listing_id}.html"
+    # use the os path way instead
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    list_details_path = os.path.join(base_dir, "html_files", f"listing_{listing_id}.html")
 
-    with open(html_file, "r", encoding="utf-8-sig") as file:
+    with open(list_details_path, "r", encoding="utf-8-sig") as file:
         html_content = file.read()
         soup = BeautifulSoup(html_content, "html.parser")
 
         text = soup.get_text()
 
-      
+        policy_label = soup.find(string=lambda t: "Policy number" in t)
+        policy_num = policy_label.find_next('span').get_text()
         policy_number = ""
 
-        match1 = re.search(r"STR-\d{7}", text)
-        match2 = re.search(r"20\d{2}-00\d{4}STR", text)
-
-        if match1:
-            policy_number = match1.group()
-        elif match2:
-            policy_number = match2.group()
-        elif "Exempt" in text:
-            policy_number = "Exempt"
-        elif listing_id == "49043049":
+        if "pending" in policy_num.lower():
             policy_number = "Pending"
+        elif "exempt" in policy_num.lower():
+            policy_number = "Exempt"
         else:
-            policy_number = ""
+            policy_number = policy_num
 
 
         host_type = "regular"
-        if "Superhost" in text:
-            host_type = "Superhost"
+        host_span = soup.find('span', class_='_1mhorg9')
+
+        # host_text = soup.find('span', class_='_1mhorg9').get_text()
+        # if "superhost" in host_text.lower():
+        #     host_type = "Superhost"
+
+
+        #######fixed this here
+        if host_span:
+            host_text = host_span.get_text()
+            if "superhost" in host_text.lower():
+                host_type = "Superhost"
+        #######
 
         host_name = ""
 
         if "Hosted by" in text:
             start = text.find("Hosted by") + len("Hosted by")
-            host_name = text[start:start+20].strip()
+            host_name = text[start:start+30].strip()
 
             host_name = host_name.split("Joined")[0].strip()
 
+        # <span class="_12si43g" aria-hidden="true">4.89</span>
+
         room_type = "Entire Room"
+        container = soup.find('div', class_='_tqmy57')
+        if container:
+            room_text = container.get_text(strip=True).lower()
+            
+            if "private room" in room_text:
+                room_type = "Private Room"
+            elif "shared room" in room_text:
+                room_type = "Shared Room"
+            
 
-        if "Private room" in text:
-            room_type = "Private Room"
-        elif "Shared room" in text:
-            room_type = "Shared Room"
-        else:
-            room_type = "Entire Room"
-
+        ######## I uncommeend the line you had previously, commented this out####
         location_rating = 0.0
-
+        # loc = soup.find('span', class_='_12si43g')
+        # if loc:
+        #     t_loc = loc.get_text()
+        #     match = re.search(r"(\d+\.?\d+?)", t_loc)
+        #     # clean_l = match.get_text().strip().replace(' ', '')
+        #     location_rating = float(match.group(1))
+        #############
         match = re.search(r"Location\s*([0-9]\.[0-9])", text)
         if match:
             location_rating = float(match.group(1))
@@ -302,21 +338,20 @@ class TestCases(unittest.TestCase):
 
         # TODO: Call get_listing_details() on each listing id above and save results in a list.
 
+        results = []
+
+        for item in html_list:
+            results.append(get_listing_details(item))
+
         # TODO: Spot-check a few known values by opening the corresponding listing_<id>.html files.
         # 1) Check that listing 467507 has the correct policy number "STR-0005349".
         # 2) Check that listing 1944564 has the correct host type "Superhost" and room type "Entire Room".
         # 3) Check that listing 1944564 has the correct location rating 4.9.
-        html_list = ["467507", "1550913", "1944564", "4614763", "6092596"]
-
-        results = []
-        for i in html_list:
-            results.append(get_listing_details(i))
-
-        self.assertEqual( results[0]["467507"]["policy_number"], "STR-0005349")
-        self.assertEqual(results[2]["1944564"]["host_type"], "Superhost")
-        self.assertEqual( results[2]["1944564"]["room_type"],"Entire Room")
-        self.assertEqual(results[2]["1944564"]["location_rating"],4.9)
-
+        
+        self.assertEqual(results[0]["467507"]["policy_number"], "STR-0005349", msg="Fail")
+        self.assertEqual(results[2]["1944564"]["host_type"], "Superhost", msg="Fail")
+        self.assertEqual(results[2]["1944564"]["room_type"], "Entire Room", msg="Fail")
+        self.assertEqual(results[2]["1944564"]["location_rating"], 4.9, msg="Fail")
     def test_create_listing_database(self):
         # TODO: Check that each tuple in detailed_data has exactly 7 elements:
         # (listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating)
@@ -324,6 +359,7 @@ class TestCases(unittest.TestCase):
         # TODO: Spot-check the LAST tuple is ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8).
         for row in self.detailed_data:
             self.assertEqual(len(row), 7)
+        print(self.detailed_data[-1])
         self.assertEqual(
         self.detailed_data[-1],
         ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8)
@@ -349,7 +385,6 @@ class TestCases(unittest.TestCase):
             ["Guesthouse in San Francisco", "49591060", "STR-0000253", "Superhost", "Ingrid", "Entire Room", "5.0"]
         )
 
-        os.remove(out_path)
 
     def test_avg_location_rating_by_room_type(self):
         # TODO: Call avg_location_rating_by_room_type() and save the output.
