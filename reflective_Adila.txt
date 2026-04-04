@@ -1,0 +1,41 @@
+1) I do not think the current system provides adequate accountability around short-term rentals in 
+San Francisco. One of the main reasons is that, in this project, we had to determine whether a listing’s 
+policy number was valid by extracting the data ourselves through web scraping. In doing so, we found 
+listings where the policy number was not valid as it was neither “Pending,” “Exempt,” nor in a valid 
+format yet the listing was still available on the platform. This shows that the system does not effectively 
+enforce compliance. Additionally, the policy numbers were not easily visible and had to be extracted from 
+individual listing pages which suggests a lack of transparency. If users cannot easily verify whether a 
+listing is legally registered, it becomes difficult to hold hosts accountable. According to the SWE Code of 
+Ethics, software engineers should ensure that their products meet high professional standards and 
+prioritize the public good. Allowing listings with unclear or invalid policy numbers to remain active 
+does not meet these standards as it may mislead users and create potential safety or legal concerns. 
+To improve accountability, Airbnb should require hosts to submit verified policy numbers before allowing 
+listings to be posted. The platform should also clearly display these numbers on the main listing pages so 
+users can easily access them. This would increase trust between users and the platform.
+
+
+2) After reading the articles, one important factor to consider when discussing the legality of web 
+scraping is whether websites clearly communicate their rules and restrictions regarding scraping. 
+In many cases, legality depends on whether a user is violating a website’s terms of service or accessing 
+data in an unauthorized way. However, these terms are often long, unclear, or do not explicitly address 
+web scraping. For example, in the case where researchers created fake profiles to test discrimination, 
+the judge ruled that their actions did not violate the Computer Fraud and Abuse Act (CFAA) because the 
+website did not clearly prohibit the use of fake identities. This shows that when guidelines are vague or 
+missing, it becomes difficult to determine what counts as “unauthorized access.” Because of this, having a 
+clear and accessible section specifically addressing web scraping on websites would help both users and 
+companies to ensure the legality of web scraping being honored. So, it would reduce ambiguity and make it
+easier to determine whether scraping is legal or not.
+
+3) Two guidelines that are important to consider when deciding whether to perform web scraping are protecting user 
+privacy and minimizing harm to the platform being scraped.
+    Web scraping should not expose or misuse sensitive or personal information even if that data is publicly available. Just because
+    information is accessible online does not mean it is ethical to collect and analyze it at scale. For example, 
+    scandals like Facebook–Cambridge Analytica show how personal data can be used in ways that harm individuals without 
+    their consent. Similar to how HIPAA protects sensitive health information, scraping practices should avoid collecting 
+    identifiable or sensitive data and should ensure that users are not negatively impacted.
+    
+    Web scraping should not harm the functionality or performance of the website being scraped. Sending a 
+    large number of automated requests can overload servers, slow down services and negatively affect real 
+    users trying to access the site. Ethical scraping should avoid excessive traffic, and ensure that the 
+    platform and its users are not disrupted.
+
