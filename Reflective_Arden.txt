@@ -1,0 +1,37 @@
+Question 1:
+    I believe the current system is inadequate because it places an unreasonable verification burden on third parties 
+and the public. While the city requires registration, the fact that investigations are purely complaint-based 
+creates a reactive rather than proactive environment. From a UX and systems design perspective, this relies on 
+governance by friction. Airbnb technically displays policy numbers, but without a real-time, automated link to the 
+city’s planning database, there is no way for a casual user to know if a number is valid or fabricated. Airbnb doesn't
+really enforce locations having the proper buisness liscensing, and it is not a requirement to input liscensing 
+information when listing your room. This can be obnoxious for neighbors, and sketchy for Airbnb customers.
+    To improve accountability, I believe there should be a mandated API integration between the platform and the city’s 
+registration office. Instead of relying on manual scraping by third parties to catch violators, the platform should be 
+required to verify license numbers against the city's registry before a listing can even go live. This aligns with the 
+SWE Code of Ethics regarding Public Interest, as it ensures that the software platform isn't being used as a tool to 
+bypass local housing laws, which contribute to the Bay Area's housing shortage. This forced verification would also make 
+Airbnb listings more trustworthy and legal.
+
+Question 2:
+    One critical factor is the intent and public-facing nature of the data versus the platform’s Terms of Service (ToS). 
+As seen in cases involving the Computer Fraud and Abuse Act (the CFAA), there is a fine line between accessing public 
+information and exceeding authorized access. I believe a key factor to consider is whether the scraping mimics a human 
+user's actions or if it places a burden or overloads the server (like the cyber attacks we've talked about in lecture).
+    In this project, for instance, we used static HTML files to avoid violating Airbnb's ToS, which highlights that even 
+if data is technically public on a browser, the legal right to extract it at scale is still highly contested. Legality 
+should consider whether the scraping is being done for good reason (like holding hosts accountable for rental 
+laws) or for a competitive commercial advantage, as the former serves a much higher public utility.
+
+Question 3:
+    I think two guidelines would help people evaluate the ethical risks of webscraping.
+      One would be the principle of individual privacy expectation. Which is that before scraping, one must question if the 
+        person who posted this data expects it to be used in this way. Even if data is public (like a social media post or an 
+        Airbnb listing), the user may not have consented to having their data aggregated, deanonymized, or used for algorithmic 
+        profiling. If the scraping could lead to the identification of private individuals who didn't intend to be public figures, 
+        it should be avoided or strictly anonymized.
+      The other would be the proportionality of social benefit. Which is that there should be a clear, positive social outcome  
+        that outweighs the potential harm to the platform or the users' privacy. In this Airbnb project, the social benefit is  
+        protecting the local housing market from illegal rentals. However, if the scraping is merely to harvest emails for marketing  
+        or to create a secondary "shadow" database of users without their knowledge, the ethical cost is too high compared to the 
+        benefit.
