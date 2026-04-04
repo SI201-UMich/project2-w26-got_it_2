@@ -131,10 +131,20 @@ def get_listing_details(listing_id) -> dict:
 
 
         host_type = "regular"
-        host_text = soup.find('span', class_='_1mhorg9').get_text()
-        if "superhost" in host_text.lower():
-            host_type = "Superhost"
+    
+        ###Previously you had this:
+        # host_text = soup.find('span', class_='_1mhorg9').get_text()
+        # if "superhost" in host_text.lower():
+        #     host_type = "Superhost"
 
+
+        ####### I added this here
+        host_span = soup.find('span', class_='_1mhorg9')
+        if host_span:
+            host_text = host_span.get_text()
+            if "superhost" in host_text.lower():
+                host_type = "Superhost"
+        #######
 
         host_name = ""
 
@@ -146,28 +156,30 @@ def get_listing_details(listing_id) -> dict:
 
         # <span class="_12si43g" aria-hidden="true">4.89</span>
 
+        room_type = "Entire Room"
         container = soup.find('div', class_='_tqmy57')
         if container:
-            text = container.get_text(strip=True).lower()
+            room_text = container.get_text(strip=True).lower()
             
-            if "private room" in text:
+            if "private room" in room_text:
                 room_type = "Private Room"
-            elif "shared room" in text:
+            elif "shared room" in room_text:
                 room_type = "Shared Room"
-            else:
-                room_type = "Entire Room"
+            
 
+        ######## I uncommeend the line you had previously, commented this out####
+        # loc = soup.find('span', class_='_12si43g')
+        # if loc:
+        #     t_loc = loc.get_text()
+        #     match = re.search(r"(\d+\.?\d+?)", t_loc)
+        #     # clean_l = match.get_text().strip().replace(' ', '')
+        #     location_rating = float(match.group(1))
+        ################
+        
         location_rating = 0.0
-        loc = soup.find('span', class_='_12si43g')
-        if loc:
-            t_loc = loc.get_text()
-            match = re.search(r"(\d+\.?\d+?)", t_loc)
-            # clean_l = match.get_text().strip().replace(' ', '')
+        match = re.search(r"Location\s*([0-9]\.[0-9])", text)
+        if match:
             location_rating = float(match.group(1))
-
-        #match = re.search(r"Location\s*([0-9]\.[0-9])", loc)
-        #if match:
-        #    location_rating = float(match.group(0))
 
         l_dict[listing_id] = {
             "policy_number": policy_number,
@@ -177,7 +189,7 @@ def get_listing_details(listing_id) -> dict:
             "location_rating": location_rating
         }
 
-    return l_dict
+        return l_dict
 
     # ==============================
     # YOUR CODE ENDS HERE
@@ -199,7 +211,29 @@ def create_listing_database(html_path) -> list[tuple]:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    listings = load_listing_results(html_path)
+    database = []
+
+    for listing in listings:
+        listing_title = listing[0]
+        listing_id = listing[1]
+
+        details = get_listing_details(listing_id)
+        info = details[listing_id]
+
+        row = (
+            listing_title,
+            listing_id,
+            info["policy_number"],
+            info["host_type"],
+            info["host_name"],
+            info["room_type"],
+            info["location_rating"]
+        )
+
+        database.append(row)
+
+    return database
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -367,7 +401,8 @@ class TestCases(unittest.TestCase):
     def test_avg_location_rating_by_room_type(self):
         # TODO: Call avg_location_rating_by_room_type() and save the output.
         # TODO: Check that the average for "Private Room" is 4.9.
-        pass
+        check = avg_location_rating_by_room_type(self.detailed_data)
+        self.assertEqual(check["Private Room"], 4.9, msg="Fail")
 
     def test_validate_policy_numbers(self):
         # TODO: Call validate_policy_numbers() on detailed_data and save the result into a variable invalid_listings.
@@ -444,3 +479,81 @@ if __name__ == "__main__":
     #     print(f"Error: The file {file_path} was not found.")
 
     # return l_dict
+
+
+
+
+    #MORE PAST GET LISTING DETAILS 
+
+# l_dict = {}
+
+#     # use the os path way instead
+#     base_dir = os.path.abspath(os.path.dirname(__file__))
+#     list_details_path = os.path.join(base_dir, "html_files", f"listing_{listing_id}.html")
+
+#     with open(list_details_path, "r", encoding="utf-8-sig") as file:
+#         html_content = file.read()
+#         soup = BeautifulSoup(html_content, "html.parser")
+
+#         text = soup.get_text()
+
+#         policy_label = soup.find(string=lambda t: "Policy number" in t)
+#         policy_num = policy_label.find_next('span').get_text()
+#         policy_number = ""
+
+#         if "pending" in policy_num.lower():
+#             policy_number = "Pending"
+#         elif "exempt" in policy_num.lower():
+#             policy_number = "Exempt"
+#         else:
+#             policy_number = policy_num
+
+
+#         host_type = "regular"
+#         host_text = soup.find('span', class_='_1mhorg9').get_text()
+#         if "superhost" in host_text.lower():
+#             host_type = "Superhost"
+
+
+#         host_name = ""
+
+#         if "Hosted by" in text:
+#             start = text.find("Hosted by") + len("Hosted by")
+#             host_name = text[start:start+30].strip()
+
+#             host_name = host_name.split("Joined")[0].strip()
+
+#         # <span class="_12si43g" aria-hidden="true">4.89</span>
+
+#         container = soup.find('div', class_='_tqmy57')
+#         if container:
+#             text = container.get_text(strip=True).lower()
+            
+#             if "private room" in text:
+#                 room_type = "Private Room"
+#             elif "shared room" in text:
+#                 room_type = "Shared Room"
+#             else:
+#                 room_type = "Entire Room"
+
+#         location_rating = 0.0
+#         loc = soup.find('span', class_='_12si43g')
+#         if loc:
+#             t_loc = loc.get_text()
+#             match = re.search(r"(\d+\.?\d+?)", t_loc)
+#             # clean_l = match.get_text().strip().replace(' ', '')
+#             location_rating = float(match.group(1))
+
+#         #match = re.search(r"Location\s*([0-9]\.[0-9])", loc)
+#         #if match:
+#         #    location_rating = float(match.group(0))
+
+#         l_dict[listing_id] = {
+#             "policy_number": policy_number,
+#             "host_type": host_type,
+#             "host_name": host_name,
+#             "room_type": room_type,
+#             "location_rating": location_rating
+#         }
+
+#     return l_dict
