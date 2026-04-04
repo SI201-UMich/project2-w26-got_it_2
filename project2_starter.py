@@ -1,14 +1,15 @@
 # SI 201 HW4 (Library Checkout System)
-# Your name:
-# Your student id:
-# Your email:
+# Your name: Adila Fatema, Arden Stirling
+# Your student id: 14608817,  8531 6564
+# Your email: adilaf@umich.edu
 # Who or what you worked with on this homework (including generative AI like ChatGPT):
+# We, Adila and Arden, both worked on this together.
 # If you worked with generative AI also add a statement for how you used it.
 # e.g.:
 # Asked ChatGPT for hints on debugging and for suggestions on overall code structure
-#
+#Used ChatGPt for debugging errors
 # Did your use of GenAI on this assignment align with your goals and guidelines in your Gen AI contract? If not, why?
-#
+# Yes
 # --- ARGUMENTS & EXPECTED RETURN VALUES PROVIDED --- #
 # --- SEE INSTRUCTIONS FOR FULL DETAILS ON METHOD IMPLEMENTATION --- #
 
@@ -38,10 +39,7 @@ def load_listing_results(html_path) -> list[tuple]:
         list[tuple]: A list of tuples containing (listing_title, listing_id)
     """
     # TODO: Implement checkout logic following the instructions
-    # ==============================
-    # YOUR CODE STARTS HERE
-    # ==============================
-
+ 
     l_results = []
 
     try:
@@ -90,10 +88,7 @@ def get_listing_details(listing_id) -> dict:
         }
     """
     # TODO: Implement checkout logic following the instructions
-    # ==============================
-    # YOUR CODE STARTS HERE
-    # ==============================
-
+  
     l_dict = {}
 
     # use the os path way instead
@@ -121,17 +116,11 @@ def get_listing_details(listing_id) -> dict:
         host_type = "regular"
         host_span = soup.find('span', class_='_1mhorg9')
 
-        # host_text = soup.find('span', class_='_1mhorg9').get_text()
-        # if "superhost" in host_text.lower():
-        #     host_type = "Superhost"
-
-
-        #######fixed this here
+    
         if host_span:
             host_text = host_span.get_text()
             if "superhost" in host_text.lower():
                 host_type = "Superhost"
-        #######
 
         host_name = ""
 
@@ -141,7 +130,6 @@ def get_listing_details(listing_id) -> dict:
 
             host_name = host_name.split("Joined")[0].strip()
 
-        # <span class="_12si43g" aria-hidden="true">4.89</span>
 
         room_type = "Entire Room"
         container = soup.find('div', class_='_tqmy57')
@@ -154,15 +142,7 @@ def get_listing_details(listing_id) -> dict:
                 room_type = "Shared Room"
             
 
-        ######## I uncommeend the line you had previously, commented this out####
         location_rating = 0.0
-        # loc = soup.find('span', class_='_12si43g')
-        # if loc:
-        #     t_loc = loc.get_text()
-        #     match = re.search(r"(\d+\.?\d+?)", t_loc)
-        #     # clean_l = match.get_text().strip().replace(' ', '')
-        #     location_rating = float(match.group(1))
-        #############
         match = re.search(r"Location\s*([0-9]\.[0-9])", text)
         if match:
             location_rating = float(match.group(1))
@@ -244,6 +224,7 @@ def output_csv(data, filename) -> None:
             writer.writerow(row)
 
 
+
 def avg_location_rating_by_room_type(data) -> dict:
     """
     Calculate the average location_rating for each room_type.
@@ -257,8 +238,27 @@ def avg_location_rating_by_room_type(data) -> dict:
     Returns:
         dict: {room_type: average_location_rating}
     """
-    pass
 
+    avg_rating = {}
+    final_averages = {}
+
+    for d_tuple in data:
+        listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating = d_tuple
+
+        if location_rating == 0.0:
+            continue
+        
+        if room_type not in avg_rating:
+            avg_rating[room_type] = {'total_score': location_rating, 'count': 1}
+        else:
+            avg_rating[room_type]['total_score'] += location_rating
+            avg_rating[room_type]['count'] += 1
+
+    for room, stats in avg_rating.items():
+        average = stats['total_score'] / stats['count']
+        final_averages[room] = round(average, 1)
+
+    return final_averages
 
 
 
@@ -289,6 +289,7 @@ def validate_policy_numbers(data) -> list[str]:
             incorrect.append(listing_id)
 
     return incorrect
+
 # EXTRA CREDIT
 def google_scholar_searcher(query):
     """
@@ -328,6 +329,7 @@ class TestCases(unittest.TestCase):
     def test_load_listing_results(self):
         # TODO: Check that the number of listings extracted is 18.
         # TODO: Check that the FIRST (title, id) tuple is  ("Loft in Mission District", "1944564").
+
         self.assertEqual(len(self.listings), 18)
         self.assertEqual(self.listings[0], ("Loft in Mission District", "1944564"))
 
@@ -352,11 +354,12 @@ class TestCases(unittest.TestCase):
         self.assertEqual(results[2]["1944564"]["host_type"], "Superhost", msg="Fail")
         self.assertEqual(results[2]["1944564"]["room_type"], "Entire Room", msg="Fail")
         self.assertEqual(results[2]["1944564"]["location_rating"], 4.9, msg="Fail")
+
     def test_create_listing_database(self):
         # TODO: Check that each tuple in detailed_data has exactly 7 elements:
         # (listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating)
-
         # TODO: Spot-check the LAST tuple is ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8).
+
         for row in self.detailed_data:
             self.assertEqual(len(row), 7)
         print(self.detailed_data[-1])
@@ -372,29 +375,26 @@ class TestCases(unittest.TestCase):
         # # TODO: Check that the first data row matches ["Guesthouse in San Francisco", "49591060", "STR-0000253", "Superhost", "Ingrid", "Entire Room", "5.0"].
        
         out_path = os.path.join(self.base_dir, "test.csv")
-
         output_csv(self.detailed_data, out_path)
-
         rows = []
         with open(out_path, encoding="utf-8-sig") as f:
             reader = csv.reader(f)
             for row in reader:
                 rows.append(row)
-
         self.assertEqual(rows[1],
             ["Guesthouse in San Francisco", "49591060", "STR-0000253", "Superhost", "Ingrid", "Entire Room", "5.0"]
         )
 
-
     def test_avg_location_rating_by_room_type(self):
         # TODO: Call avg_location_rating_by_room_type() and save the output.
         # TODO: Check that the average for "Private Room" is 4.9.
-       pass
+        check = avg_location_rating_by_room_type(self.detailed_data)
+        self.assertEqual(check["Private Room"], 4.9, msg="Fail")
 
     def test_validate_policy_numbers(self):
         # TODO: Call validate_policy_numbers() on detailed_data and save the result into a variable invalid_listings.
         # TODO: Check that the list contains exactly "16204265" for this dataset.
-    
+
         incorrect = validate_policy_numbers(self.detailed_data)
         self.assertEqual(incorrect, ["16204265"])
 
