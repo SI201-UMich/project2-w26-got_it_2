@@ -49,7 +49,10 @@ def load_listing_results(html_path) -> list[tuple]:
     l_results = []
 
     try:
-        with open(html_path, "r", encoding="utf-8-sig") as file:
+        base_dir = os.path.abspath(os.path.dirname(__file__))
+        search_results_path = os.path.join(base_dir, "html_files", "search_results.html")
+
+        with open(search_results_path, "r", encoding="utf-8-sig") as file:
             html_content = file.read()
         
         soup = BeautifulSoup(html_content, 'html.parser')
@@ -103,118 +106,60 @@ def get_listing_details(listing_id) -> dict:
     # YOUR CODE STARTS HERE
     # ==============================
 
-    # l_dict = {}
-    # file_path = f"listing_{listing_id}.html"
-
-    # try:
-    #     with open(file_path, "r", encoding="utf-8-sig") as file:
-    #         html_content = file.read()
-        
-    #     soup = BeautifulSoup(html_content, 'html.parser')
-
-    #     # example html line:
-    #     # "Policy number: " "== $0 <span class="ll4r2nl dir dir-ltr">STR-0001085</span>
-    #     policy_num = soup.find('span', class_='ll4r2nl').get_text()
-    #     policy_number = ""
-    #     if "pending" in policy_num:
-    #         policy_number = "Pending"
-    #     elif "exempt" in policy_num:
-    #         policy_number = "Exempt"
-    #     else:
-    #         policy_number = policy_num
-
-    #     # example html line:
-    #     # <span aria-hidden="false" class"_1mhorg9">Superhost</span> == $0
-    #     host_check = soup.find('span', class_='_1mhorg9').get_text()
-    #     host_type = ""
-
-    #     if host_check:
-    #         host_check.strip()
-    #         if host_check == "Superhost":
-    #             host_type = "Superhost"
-    #         else:
-    #             host_type = "Regular"
-                
-    #     # example html line:
-    #     # <h2 tabindex="-1" class="hnwb2pd dir dir-ltr" elementtiming="LCP-target">Hosted by Michelle</h2> == $0
-    #     host_name = soup.find('h2', class_='hnwb2pb').get_text()
-
-    #     # example html line:
-    #     # <div class="_kh3xmo">Private room in home</div> == $0
-    #     room_check = soup.find('span', class_='_kh3xmo').get_text()
-    #     room_type = ""
-
-    #     if room_check:
-    #         room_check.strip()
-    #         if "Private" in room_check:
-    #             room_type = "Private Room"
-    #         elif "Shared" in room_check:
-    #             room_type = "Shared Room"
-    #         else:
-    #             room_type = "Entire Room"
-
-    #     button = soup.find('button', attrs={'aria-label': re.compile(r'Rated')})
-    #     if button:
-    #         full_label = button['aria-label']
-    #         location_rating = re.search(r'(\d+\d+)', full_label).group(1)
-
-    # except FileNotFoundError:
-    #     print(f"Error: The file {file_path} was not found.")
-
-    # return l_dict
-
     l_dict = {}
 
-    html_file = f"html_files/listing_{listing_id}.html"
+    # use the os path way instead
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    list_details_path = os.path.join(base_dir, "html_files", f"listing_{listing_id}.html")
 
-    with open(html_file, "r", encoding="utf-8-sig") as file:
+    with open(list_details_path, "r", encoding="utf-8-sig") as file:
         html_content = file.read()
         soup = BeautifulSoup(html_content, "html.parser")
 
         text = soup.get_text()
 
-      
+        policy_label = soup.find(string=lambda t: "Policy number" in t)
+        policy_num = policy_label.find_next('span').get_text()
         policy_number = ""
 
-        match1 = re.search(r"STR-\d{7}", text)
-        match2 = re.search(r"20\d{2}-00\d{4}STR", text)
-
-        if match1:
-            policy_number = match1.group()
-        elif match2:
-            policy_number = match2.group()
-        elif "Exempt" in text:
-            policy_number = "Exempt"
-        elif listing_id == "49043049":
+        if "pending" in policy_num.lower():
             policy_number = "Pending"
+        elif "exempt" in policy_num.lower():
+            policy_number = "Exempt"
         else:
-            policy_number = ""
+            policy_number = policy_num
 
 
         host_type = "regular"
-        if "Superhost" in text:
+        host_text = soup.find('span', class_='_1mhorg9').get_text()
+        if "superhost" in host_text.lower():
             host_type = "Superhost"
+
 
         host_name = ""
 
         if "Hosted by" in text:
             start = text.find("Hosted by") + len("Hosted by")
-            host_name = text[start:start+20].strip()
+            host_name = text[start:start+30].strip()
 
             host_name = host_name.split("Joined")[0].strip()
 
-        room_type = "Entire Room"
+        # <span class="_12si43g" aria-hidden="true">4.89</span>
 
-        if "Private room" in text:
-            room_type = "Private Room"
-        elif "Shared room" in text:
-            room_type = "Shared Room"
-        else:
-            room_type = "Entire Room"
+        container = soup.find('div', class_='_tqmy57')
+        if container:
+            text = container.get_text(strip=True).lower()
+            
+            if "private room" in text:
+                room_type = "Private Room"
+            elif "shared room" in text:
+                room_type = "Shared Room"
+            else:
+                room_type = "Entire Room"
 
         location_rating = 0.0
-
-        match = re.search(r"Location\s*([0-9]\.[0-9])", text)
+        loc = soup.find('span', class_='12si43g')
+        match = re.search(r"Location\s*([0-9]\.[0-9])", loc)
         if match:
             location_rating = float(match.group(1))
 
@@ -300,7 +245,7 @@ def avg_location_rating_by_room_type(data) -> dict:
 
     for d_tuple in data:
         listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating = d_tuple
-        
+
         if location_rating == 0.0:
             continue
         
@@ -373,19 +318,29 @@ class TestCases(unittest.TestCase):
 
     def test_load_listing_results(self):
         # TODO: Check that the number of listings extracted is 18.
+        self.assertEqual(len(self.listings), 18, msg="Fail")
         # TODO: Check that the FIRST (title, id) tuple is  ("Loft in Mission District", "1944564").
-        pass
+        self.assertEqual(self.listings[0], ("Loft in Mission District", "1944564"), msg="Fail")
 
     def test_get_listing_details(self):
         html_list = ["467507", "1550913", "1944564", "4614763", "6092596"]
 
         # TODO: Call get_listing_details() on each listing id above and save results in a list.
 
+        results = []
+
+        for item in html_list:
+            results.append(get_listing_details(item))
+
         # TODO: Spot-check a few known values by opening the corresponding listing_<id>.html files.
         # 1) Check that listing 467507 has the correct policy number "STR-0005349".
         # 2) Check that listing 1944564 has the correct host type "Superhost" and room type "Entire Room".
         # 3) Check that listing 1944564 has the correct location rating 4.9.
-        pass
+        
+        self.assertEqual(results[0]["467507"]["policy_number"], "STR-0005349", msg="Fail")
+        self.assertEqual(results[2]["1944564"]["host_type"], "Superhost", msg="Fail")
+        self.assertEqual(results[2]["1944564"]["room_type"], "Entire Room", msg="Fail")
+        self.assertEqual(results[2]["1944564"]["location_rating"], 4.9, msg="Fail")
 
     def test_create_listing_database(self):
         # TODO: Check that each tuple in detailed_data has exactly 7 elements:
@@ -422,3 +377,64 @@ def main():
 if __name__ == "__main__":
     main()
     unittest.main(verbosity=2)
+
+# EXTRA GET_LISTING_DETAILS FUNCTION BITS:
+    # l_dict = {}
+    # file_path = f"listing_{listing_id}.html"
+
+    # try:
+    #     with open(file_path, "r", encoding="utf-8-sig") as file:
+    #         html_content = file.read()
+        
+    #     soup = BeautifulSoup(html_content, 'html.parser')
+
+    #     # example html line:
+    #     # "Policy number: " "== $0 <span class="ll4r2nl dir dir-ltr">STR-0001085</span>
+    #     policy_num = soup.find('span', class_='ll4r2nl').get_text()
+    #     policy_number = ""
+    #     if "pending" in policy_num:
+    #         policy_number = "Pending"
+    #     elif "exempt" in policy_num:
+    #         policy_number = "Exempt"
+    #     else:
+    #         policy_number = policy_num
+
+    #     # example html line:
+    #     # <span aria-hidden="false" class"_1mhorg9">Superhost</span> == $0
+    #     host_check = soup.find('span', class_='_1mhorg9').get_text()
+    #     host_type = ""
+
+    #     if host_check:
+    #         host_check.strip()
+    #         if host_check == "Superhost":
+    #             host_type = "Superhost"
+    #         else:
+    #             host_type = "Regular"
+                
+    #     # example html line:
+    #     # <h2 tabindex="-1" class="hnwb2pd dir dir-ltr" elementtiming="LCP-target">Hosted by Michelle</h2> == $0
+    #     host_name = soup.find('h2', class_='hnwb2pb').get_text()
+
+    #     # example html line:
+    #     # <div class="_kh3xmo">Private room in home</div> == $0
+    #     room_check = soup.find('span', class_='_kh3xmo').get_text()
+    #     room_type = ""
+
+    #     if room_check:
+    #         room_check.strip()
+    #         if "Private" in room_check:
+    #             room_type = "Private Room"
+    #         elif "Shared" in room_check:
+    #             room_type = "Shared Room"
+    #         else:
+    #             room_type = "Entire Room"
+
+    #     button = soup.find('button', attrs={'aria-label': re.compile(r'Rated')})
+    #     if button:
+    #         full_label = button['aria-label']
+    #         location_rating = re.search(r'(\d+\d+)', full_label).group(1)
+
+    # except FileNotFoundError:
+    #     print(f"Error: The file {file_path} was not found.")
+
+    # return l_dict
