@@ -158,10 +158,16 @@ def get_listing_details(listing_id) -> dict:
                 room_type = "Entire Room"
 
         location_rating = 0.0
-        loc = soup.find('span', class_='12si43g')
-        match = re.search(r"Location\s*([0-9]\.[0-9])", loc)
-        if match:
+        loc = soup.find('span', class_='_12si43g')
+        if loc:
+            t_loc = loc.get_text()
+            match = re.search(r"(\d+\.?\d+?)", t_loc)
+            # clean_l = match.get_text().strip().replace(' ', '')
             location_rating = float(match.group(1))
+
+        #match = re.search(r"Location\s*([0-9]\.[0-9])", loc)
+        #if match:
+        #    location_rating = float(match.group(0))
 
         l_dict[listing_id] = {
             "policy_number": policy_number,
